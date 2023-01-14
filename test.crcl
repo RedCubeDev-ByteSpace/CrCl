@@ -1,0 +1,12 @@
+func main() int32 {
+    local a <- 100;
+    local ptr[byte] b;
+
+    b <- alloc byte * 200;
+
+    if b = NULL {
+        cry();
+    }
+
+    local c <- "string moment";
+}

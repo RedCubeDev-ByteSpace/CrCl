@@ -1,0 +1,4 @@
+/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/redcube/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/222.4345.21/bin/ninja/linux/ninja -G Ninja -S /home/redcube/CLionProjects/CrCL -B /home/redcube/CLionProjects/CrCL/cmake-build-debug
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/redcube/CLionProjects/CrCL/cmake-build-debug
