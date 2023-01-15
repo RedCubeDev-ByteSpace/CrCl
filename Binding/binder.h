@@ -47,7 +47,6 @@ typedef enum BOUND_NODE_TYPE {
     BoundExpressionStatement,
 
     // Expressions
-    BoundParenthesizedExpression,
     BoundLiteralExpression,
     BoundAssignmentExpression,
     BoundCallExpression,

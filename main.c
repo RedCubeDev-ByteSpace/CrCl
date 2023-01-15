@@ -7,6 +7,7 @@
 #include "Parsing/parser.h"
 #include "Binding/Builtins/builtins.h"
 #include "Binding/binder.h"
+#include "Emitting/emitter.h"
 
 // Writing a compiler in C because i hate myself
 // also i like challenges i guess
@@ -52,26 +53,31 @@ int main(int argc, char** argv) {
 
     TokenList tokens = Lex(source);
 
-    printf("Tokens:\n");
-    printf("-------\n");
-    PrintTokenList(tokens);
+//    printf("Tokens:\n");
+//    printf("-------\n");
+//    PrintTokenList(tokens);
 
     // :b:arsing
-    printf("Members:\n");
-    printf("--------\n");
+//    printf("Members:\n");
+//    printf("--------\n");
 
     NodeList nodes = Parse(tokens);
 
-    for (int i = 0; i < nodes.Count; i++) {
-        FunctionMemberNode *fnc = nodes.NodeBuffer[i];
-        printf("Function %s\n Returns: %s\n Number of parameters: %d\n\n", fnc->Identifier.Text, fnc->ReturnType == NULL ? "void" : fnc->ReturnType->Identifier.Text, fnc->Parameters->Count);
-    }
+//    for (int i = 0; i < nodes.Count; i++) {
+//        FunctionMemberNode *fnc = nodes.NodeBuffer[i];
+//        printf("Function %s\n Returns: %s\n Number of parameters: %d\n\n", fnc->Identifier.Text, fnc->ReturnType == NULL ? "void" : fnc->ReturnType->Identifier.Text, fnc->Parameters->Count);
+//    }
 
     // :p:inding
     InitBuiltins();
     InitOperators();
 
     BoundProgram *boundProgram = BindMembers(nodes);
+
+    // emitting
+    printf("C Output:\n");
+    printf("---------\n");
+    EmitProgram(boundProgram);
 
     // The exit status of a process in computer programming is a small number passed from a child process (or callee) to a parent process (or caller)
     // when it has finished executing a specific procedure or delegated task. In DOS, this may be referred to as an error level.
