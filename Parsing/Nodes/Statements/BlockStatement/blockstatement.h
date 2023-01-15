@@ -5,7 +5,7 @@
 #ifndef CRCL_BLOCKSTATEMENT_H
 #define CRCL_BLOCKSTATEMENT_H
 
-#include "../../../parser.h"
+#include "../../node.h"
 
 typedef struct STATEMENT_LIST {
     Node **Statements;
@@ -15,7 +15,7 @@ typedef struct STATEMENT_LIST {
 typedef struct BLOCK_STATEMENT_NODE {
     Node base;
 
-    StatementList *Statements;
+    StatementList Statements;
 
 } BlockStatementNode;
 

@@ -5,8 +5,6 @@
 #ifndef CRCL_NODE_H
 #define CRCL_NODE_H
 
-#include "../parser.h"
-
 typedef struct NODE Node;
 typedef struct NODE_LIST NodeList;
 

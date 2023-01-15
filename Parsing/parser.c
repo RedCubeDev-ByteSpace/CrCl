@@ -157,7 +157,7 @@ TypeClause *ParseTypeClause(Parser *prs) {
         subClauses->Clauses = GC_MALLOC(index * sizeof(TypeClause*));
 
         // copy our clause pointers
-        memcpy(subClauses->Clauses, subTypes, index * sizeof(TypeClause*));
+        for (int i = 0; i < index; i++) subClauses->Clauses[i] = subTypes[i];
 
         // remember how many we got
         subClauses->Count = index;
@@ -216,8 +216,9 @@ BlockStatementNode *ParseBlockStatement(Parser *prs) {
     // allocate some space for this block statement
     BlockStatementNode *me = GC_MALLOC(sizeof(BlockStatementNode));
     me->base.Type = BlockStatement;
-    me->Statements = GC_MALLOC(sizeof(Node*) * index);
-    memcpy(me->Statements, statements, sizeof(Node*) * index);
+    me->Statements.Count = index;
+    me->Statements.Statements = GC_MALLOC(sizeof(Node*) * index);
+    memcpy(me->Statements.Statements, statements, sizeof(Node*) * index);
 
     return me;
 }

@@ -1,6 +1,6 @@
 func main() int32 {
-    local a <- 100;
-    local ptr[byte] b;
+    //local a <- 100;
+    local ptr[int8] b;
 
     while (b = NULL) {
         b = someFunc();
@@ -8,11 +8,15 @@ func main() int32 {
         if (b != NULL) break;
     }
 
-    local c <- "string moment";
+    //local c <- "string moment";
 
     return 0;
 }
 
 func someFunc(someParam bool) {
+
+}
+
+func someFuncTheSecond(someParam bool) void {
 
 }

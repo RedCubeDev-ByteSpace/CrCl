@@ -17,7 +17,7 @@ struct TYPE_CLAUSE {
 };
 
 struct TYPE_CLAUSE_LIST {
-    TypeClause *Clauses;
+    TypeClause **Clauses;
     int Count;
 };
 
