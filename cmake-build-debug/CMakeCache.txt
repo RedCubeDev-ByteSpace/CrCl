@@ -195,6 +195,9 @@ CrCL_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 CrCL_SOURCE_DIR:STATIC=/home/redcube/CLionProjects/CrCL
 
+//The directory containing a CMake configuration file for gc.
+gc_DIR:PATH=gc_DIR-NOTFOUND
+
 
 ########################
 # INTERNAL cache entries

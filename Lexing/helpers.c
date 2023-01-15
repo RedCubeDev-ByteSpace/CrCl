@@ -4,26 +4,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <gc.h>
 #include "../Error/error.h"
 #include "lexer.h"
 
 char* TokenTypeNames[] = {
-        "Semicolon","OpenParenthesis","CloseParenthesis","OpenBrace","CloseBrace","OpenBracket","CloseBracket","LeftArrow","RightArrow","Equals","Unequals","GreaterThan","LessThan","GreaterEqual","LessEqual","Not","Pipe","PipePipe","And","AndAnd","Plus","Minus","Slash","Star","String","Number","FuncKeyword","LocalKeyword","GlobalKeyword","ReturnKeyword","NullKeyword","Identifier"
+        "Eof", "Semicolon", "Comma","OpenParenthesis","CloseParenthesis","OpenBrace","CloseBrace","OpenBracket","CloseBracket","LeftArrow","RightArrow","Equals","Unequals","GreaterThan","LessThan","GreaterEqual","LessEqual","Not","Pipe","PipePipe","And","AndAnd","Plus","Minus","Slash","Star","String","Number","FuncKeyword","LocalKeyword","GlobalKeyword","ReturnKeyword","IfKeyword", "ElseKeyword", "WhileKeyword","NullKeyword","Identifier"
 };
 
 // = ObjHelpers ===============================================================
 void DeleteToken(Token tok) {
-    free(tok.Text);
-    free(tok.Value);
+    GC_FREE(tok.Text);
+    GC_FREE(tok.Value);
 }
 
 // ============================================================================
 // Helpers
 // ============================================================================
 void AppendToken(Lexer *lxr, Token tok) {
+
+
     // no buffer?
     if (lxr->TokenBuffer == NULL) {
-        lxr->TokenBuffer = malloc(BUFFER_GROWTH_FACTOR * sizeof(Token));
+        lxr->TokenBuffer = GC_MALLOC(BUFFER_GROWTH_FACTOR * sizeof(Token));
         lxr->BufferSize  = BUFFER_GROWTH_FACTOR;
     }
 
@@ -34,12 +37,12 @@ void AppendToken(Lexer *lxr, Token tok) {
         size_t newBufferSizeInBytes = newBufferSize * sizeof(Token);
 
         // try reallocating first as its way faster than copying
-        Token *newBuffer = realloc(lxr->TokenBuffer, newBufferSizeInBytes);
+        Token *newBuffer = GC_REALLOC(lxr->TokenBuffer, newBufferSizeInBytes);
 
         // reallocation failed!
         if (newBuffer == NULL) {
-            // malloc and copy manually (slow)
-            newBuffer = malloc(newBufferSizeInBytes);
+            // GC_MALLOC and copy manually (slow)
+            newBuffer = GC_MALLOC(newBufferSizeInBytes);
             memcpy(newBuffer, lxr->TokenBuffer, newBufferSizeInBytes);
         }
 
@@ -67,7 +70,7 @@ void PrintTokenList(TokenList lst) {
         Token token = lst.Tokens[i];
 
         char *col;
-        if (token.Type <= Star)
+        if (token.Type > 0 && token.Type <= Star)
             col = KCYN;
         else if (token.Type == String || token.Type == Number)
             col = KGRN;
@@ -83,4 +86,6 @@ void PrintTokenList(TokenList lst) {
         else if (token.Type == Number)
             printf(" └> Value: %d\n", *((int*)token.Value));
     }
+
+    printf(KNRM);
 }

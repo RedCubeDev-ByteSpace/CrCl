@@ -10,6 +10,7 @@ void Die(char *ErrorMessage, ...) {
     va_list args;
     va_start(args, ErrorMessage);
 
+    printf("/!\\ ");
     vfprintf(stdout, ErrorMessage, args);
     exit(-1);
 }

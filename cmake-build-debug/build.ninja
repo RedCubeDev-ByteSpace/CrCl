@@ -73,6 +73,30 @@ build CMakeFiles/CrCL.dir/Error/error.c.o: C_COMPILER__CrCL_Debug /home/redcube/
   OBJECT_DIR = CMakeFiles/CrCL.dir
   OBJECT_FILE_DIR = CMakeFiles/CrCL.dir/Error
 
+build CMakeFiles/CrCL.dir/Parsing/parser.c.o: C_COMPILER__CrCL_Debug /home/redcube/CLionProjects/CrCL/Parsing/parser.c || cmake_object_order_depends_target_CrCL
+  DEP_FILE = CMakeFiles/CrCL.dir/Parsing/parser.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu99
+  OBJECT_DIR = CMakeFiles/CrCL.dir
+  OBJECT_FILE_DIR = CMakeFiles/CrCL.dir/Parsing
+
+build CMakeFiles/CrCL.dir/Parsing/helpers.c.o: C_COMPILER__CrCL_Debug /home/redcube/CLionProjects/CrCL/Parsing/helpers.c || cmake_object_order_depends_target_CrCL
+  DEP_FILE = CMakeFiles/CrCL.dir/Parsing/helpers.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu99
+  OBJECT_DIR = CMakeFiles/CrCL.dir
+  OBJECT_FILE_DIR = CMakeFiles/CrCL.dir/Parsing
+
+build CMakeFiles/CrCL.dir/Parsing/Nodes/Members/FunctionMember/function.c.o: C_COMPILER__CrCL_Debug /home/redcube/CLionProjects/CrCL/Parsing/Nodes/Members/FunctionMember/function.c || cmake_object_order_depends_target_CrCL
+  DEP_FILE = CMakeFiles/CrCL.dir/Parsing/Nodes/Members/FunctionMember/function.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu99
+  OBJECT_DIR = CMakeFiles/CrCL.dir
+  OBJECT_FILE_DIR = CMakeFiles/CrCL.dir/Parsing/Nodes/Members/FunctionMember
+
+build CMakeFiles/CrCL.dir/Parsing/Nodes/Expressions/BinaryExpression/binaryexpression.c.o: C_COMPILER__CrCL_Debug /home/redcube/CLionProjects/CrCL/Parsing/Nodes/Expressions/BinaryExpression/binaryexpression.c || cmake_object_order_depends_target_CrCL
+  DEP_FILE = CMakeFiles/CrCL.dir/Parsing/Nodes/Expressions/BinaryExpression/binaryexpression.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu99
+  OBJECT_DIR = CMakeFiles/CrCL.dir
+  OBJECT_FILE_DIR = CMakeFiles/CrCL.dir/Parsing/Nodes/Expressions/BinaryExpression
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target CrCL
@@ -81,8 +105,9 @@ build CMakeFiles/CrCL.dir/Error/error.c.o: C_COMPILER__CrCL_Debug /home/redcube/
 #############################################
 # Link the executable CrCL
 
-build CrCL: C_EXECUTABLE_LINKER__CrCL_Debug CMakeFiles/CrCL.dir/main.c.o CMakeFiles/CrCL.dir/Lexing/lexer.c.o CMakeFiles/CrCL.dir/Lexing/helpers.c.o CMakeFiles/CrCL.dir/Error/error.c.o
+build CrCL: C_EXECUTABLE_LINKER__CrCL_Debug CMakeFiles/CrCL.dir/main.c.o CMakeFiles/CrCL.dir/Lexing/lexer.c.o CMakeFiles/CrCL.dir/Lexing/helpers.c.o CMakeFiles/CrCL.dir/Error/error.c.o CMakeFiles/CrCL.dir/Parsing/parser.c.o CMakeFiles/CrCL.dir/Parsing/helpers.c.o CMakeFiles/CrCL.dir/Parsing/Nodes/Members/FunctionMember/function.c.o CMakeFiles/CrCL.dir/Parsing/Nodes/Expressions/BinaryExpression/binaryexpression.c.o
   FLAGS = -g
+  LINK_LIBRARIES = -lgc
   OBJECT_DIR = CMakeFiles/CrCL.dir
   POST_BUILD = :
   PRE_LINK = :

@@ -1,7 +1,7 @@
 //
 // Created by redcube on 14/01/23.
 //
-#include <stdio.h>
+#include <gc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -56,7 +56,7 @@ void LexKeyword(Lexer *lxr) {
     char buffer[256]; // i don't think ill need more
     int  index = 0;
 
-    // while not EOF and is current is letter
+    // while not Eof and is current is letter
     while ((current = CurrentChar(lxr)) != 0 && index < 255 &&
             (isalpha(current) || isdigit(current))) {
 
@@ -69,7 +69,7 @@ void LexKeyword(Lexer *lxr) {
     buffer[index] = 0;
 
     // copy the text out from the buffer
-    char *text = malloc(index);
+    char *text = GC_MALLOC(index);
     memcpy(text, buffer, index+1);
 
     TokenType type = ClassifyKeyword(text);
@@ -84,7 +84,7 @@ void LexNumber(Lexer *lxr) {
     char buffer[256]; // i don't think ill need more
     int  index = 0;
 
-    // while not EOF and is current is letter
+    // while not Eof and is current is letter
     while ((current = CurrentChar(lxr)) != 0 && index < 255 &&
             isdigit(current)) {
 
@@ -99,13 +99,13 @@ void LexNumber(Lexer *lxr) {
     buffer[index] = 0;
 
     // store the text in case we need it later
-    char *text = malloc(index);
+    char *text = GC_MALLOC(index);
     memcpy(text, buffer, index+1);
 
     int value = atoi(buffer); // living dangerously
 
     // store the number somewhere
-    int *val = malloc(sizeof(int));
+    int *val = GC_MALLOC(sizeof(int));
     *val = value;
 
     // we done
@@ -125,7 +125,7 @@ void LexString(Lexer *lxr) {
     index++;
     lxr->CurrentPointer++;
 
-    // while not EOF and current isnt "
+    // while not Eof and current isnt "
     while ((current = CurrentChar(lxr)) != 0 && current != '"') {
 
         if (index >= 512) {
@@ -148,11 +148,11 @@ void LexString(Lexer *lxr) {
     buffer[index] = 0;
 
     // copy the text out from the buffer
-    char *text = malloc(index);
+    char *text = GC_MALLOC(index);
     memcpy(text, buffer, index+1);
 
     // copy the text without the quotation marks
-    char *value = malloc(index-2);
+    char *value = GC_MALLOC(index-2);
     value[index-2] = 0;
     memcpy(value, &(buffer[1]), index-2);
 
@@ -164,7 +164,7 @@ void LexString(Lexer *lxr) {
 void LexComment(Lexer *lxr) {
     char current;
 
-    // skip forward until we hit the EOF or a new line
+    // skip forward until we hit the Eof or a new line
     while ((current = CurrentChar(lxr)) != 0 && current != '\n') lxr->CurrentPointer++;
 }
 
@@ -181,6 +181,7 @@ void LexSymbol(Lexer *lxr) {
             return;
 
         case ';': type = Semicolon; break;
+        case ',': type = Comma; break;
         case '(': type = OpenParenthesis; break;
         case ')': type = CloseParenthesis; break;
         case '{': type = OpenBrace; break;
@@ -260,7 +261,7 @@ void LexSymbol(Lexer *lxr) {
     }
 
     // store the text for some time later
-    char *text = malloc(tokenLength + 1);
+    char *text = GC_MALLOC(tokenLength + 1);
     text[tokenLength] = 0;
     memcpy(text, &(lxr->SourceCode[lxr->CurrentPointer]), tokenLength);
 
@@ -286,6 +287,12 @@ TokenType ClassifyKeyword(char *text) {
         return GlobalKeyword;
     else if (strcmp(text, "return") == 0)
         return ReturnKeyword;
+    else if (strcmp(text, "if") == 0)
+        return IfKeyword;
+    else if (strcmp(text, "else") == 0)
+        return ElseKeyword;
+    else if (strcmp(text, "while") == 0)
+        return WhileKeyword;
     else if (strcmp(text, "NULL") == 0)
         return NullKeyword;
 

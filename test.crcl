@@ -2,11 +2,17 @@ func main() int32 {
     local a <- 100;
     local ptr[byte] b;
 
-    b <- alloc byte * 200;
+    while (b = NULL) {
+        b = someFunc();
 
-    if b = NULL {
-        cry();
+        if (b != NULL) break;
     }
 
     local c <- "string moment";
+
+    return 0;
+}
+
+func someFunc(someParam bool) {
+
 }

@@ -9,8 +9,11 @@
 // ENUMS
 // ============================================================================
 typedef enum TOKEN_TYPE {
+    Eof,
+
     // Symbols
     Semicolon,        // ;
+    Comma,            // ,
     OpenParenthesis,  // (
     CloseParenthesis, // )
     OpenBrace,        // {
@@ -44,6 +47,9 @@ typedef enum TOKEN_TYPE {
     LocalKeyword,
     GlobalKeyword,
     ReturnKeyword,
+    IfKeyword,
+    ElseKeyword,
+    WhileKeyword,
     NullKeyword,
 
     // Identifiers
