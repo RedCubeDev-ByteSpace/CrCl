@@ -1,27 +1,12 @@
 func main() int32 {
-
-    {
-        local a <- 100;
-        //someFunc(a);
-    }
-
-    //someFunc(a);
-
-    local ptr[int8] b;
-
-    while (b = NULL) {
-        if (b != NULL) break;
-    }
-
-    local c <- "string moment";
-
+    PrintHelloWorld();
     return 0;
 }
 
-func someFunc(someParam bool) ptr[int8] {
-
+func PrintHelloWorld() {
+    puts("Hello world!");
 }
 
-func someFuncTheSecond(someParam bool) void {
-
-}
+// CrCl is very early in development and does not yet have a way of referencing external functions
+// so best i can do is declare it with an empty body and remove the definition from the C output later
+func puts(msg ptr[int8]) {}

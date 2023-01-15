@@ -20,7 +20,9 @@ void CodeAppend(Emitter *emt, char *a);
 void Indent(Emitter *emt);
 
 char *EmitProgram(BoundProgram *prg);
+void EmitFunctionDeclaration(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body);
 void EmitFunction(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body);
+void EmitFunctionSignature(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body);
 
 void EmitIfStatement(Emitter *emt, BoundIfStatementNode *stmt);
 void EmitReturnStatement(Emitter *emt, BoundReturnStatementNode *stmt);

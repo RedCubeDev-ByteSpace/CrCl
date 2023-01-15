@@ -13,9 +13,15 @@ char *EmitProgram(BoundProgram *prg) {
         0, 0, prg
     };
 
-    char *start = "//crcl generated code\n#include <stdint.h>\n#include <stdbool.h>\n#include <stddef.h>\n";
+    char *start = "//crcl generated code\n#include <stdint.h>\n#include <stdbool.h>\n#include <stddef.h>\n\n";
     emt->Code = GC_MALLOC(strlen(start));
     memcpy(emt->Code, start, strlen(start));
+
+    for (int i = 0; i < prg->FunctionCount; i++) {
+        EmitFunctionDeclaration(emt, prg->FunctionSymbols[i], prg->FunctionBodies[i]);
+    }
+
+    CodeAppend(emt, "\n");
 
     for (int i = 0; i < prg->FunctionCount; i++) {
         EmitFunction(emt, prg->FunctionSymbols[i], prg->FunctionBodies[i]);
@@ -24,7 +30,18 @@ char *EmitProgram(BoundProgram *prg) {
     printf("%s", emt->Code);
 }
 
+void EmitFunctionDeclaration(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body) {
+    EmitFunctionSignature(emt, sym, body);
+    CodeAppend(emt, ";\n");
+}
+
 void EmitFunction(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body) {
+    EmitFunctionSignature(emt, sym, body);
+    CodeAppend(emt,"\n");
+    EmitBlockStatement(emt, body);
+}
+
+void EmitFunctionSignature(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body) {
     CodeAppend(emt, EmitType(emt, sym->ReturnType));
     CodeAppend(emt, " ");
     CodeAppend(emt, sym->base.Name);
@@ -39,8 +56,7 @@ void EmitFunction(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *bo
             CodeAppend(emt, ", ");
     }
 
-    CodeAppend(emt, ")\n");
-    EmitBlockStatement(emt, body);
+    CodeAppend(emt, ")");
 }
 
 // =====================================================================================================================
@@ -130,6 +146,7 @@ void EmitBlockStatement(Emitter *emt, BoundBlockStatementNode *stmt) {
 }
 
 void EmitExpressionStatement(Emitter *emt, BoundExpressionStatementNode *stmt) {
+    Indent(emt);
     CodeAppend(emt, EmitExpression(emt, stmt->Expression));
     CodeAppend(emt, ";\n");
 }

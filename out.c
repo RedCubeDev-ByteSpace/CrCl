@@ -2,27 +2,22 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+int32_t main();
+void PrintHelloWorld();
+void puts(int8_t* msg);
+
 int32_t main()
 {
-    {
-        int32_t a = (100);
-    }
-
-    int8_t* b;
-    while (((b) == (NULL)))
-    {
-        if (((b) != (NULL)))
-            break;
-    }
-
-    int8_t* c = ("string moment");
+    (PrintHelloWorld());
     return (0);
 }
 
-int8_t* someFunc(bool someParam)
+void PrintHelloWorld()
 {
+    (puts(("Hello world!")));
 }
 
-void someFuncTheSecond(bool someParam)
+void puts(int8_t* msg)
 {
 }
