@@ -10,8 +10,9 @@ void Die(char *ErrorMessage, ...) {
     va_list args;
     va_start(args, ErrorMessage);
 
-    printf("/!\\ ");
+    printf(KYEL "/!\\ " KRED);
     vfprintf(stdout, ErrorMessage, args);
+    printf(KNRM);
     exit(-1);
 }
 

@@ -14,6 +14,8 @@ TypeSymbol *Int8Ptr;
 
 TypeSymbol *Void;
 
+TypeSymbol *VArgs;
+
 void InitBuiltins() {
     // create some default type symbols
 
@@ -56,4 +58,10 @@ void InitBuiltins() {
     Void->base.Type = TypeSymbolType;
     Void->base.Name = "void";
     Void->Subtypes = (TypeSymbolList) {0, 0};
+
+    // variadic args
+    VArgs = GC_MALLOC(sizeof(TypeSymbol));
+    VArgs->base.Type = TypeSymbolType;
+    VArgs->base.Name = "vargs";
+    VArgs->Subtypes = (TypeSymbolList) {0, 0};
 }

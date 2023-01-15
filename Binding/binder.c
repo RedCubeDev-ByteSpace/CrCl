@@ -24,6 +24,7 @@
 #include "Nodes/Statements/BreakStatement/breakstatement.h"
 #include "Nodes/Statements/ContinueStatement/continuestatement.h"
 #include "Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
+#include "../Parsing/Nodes/Members/ExternalFunctionMember/external.h"
 
 // =====================================================================================================================
 // Mehmborhs
@@ -44,12 +45,18 @@ BoundProgram *BindMembers(NodeList members) {
 
     // declare all functions
     for (int i = 0; i < members.Count; i++) {
-        functionSymbols[i] = BindFunctionDeclaration(bin, members.NodeBuffer[i]);
+        if (members.NodeBuffer[i]->Type == FunctionMember)
+            functionSymbols[i] = BindFunctionDeclaration(bin, members.NodeBuffer[i]);
+        else
+            functionSymbols[i] = BindExternalFunctionDeclaration(bin, members.NodeBuffer[i]);
+
         TryRegisterSymbol(rootScope, functionSymbols[i]);
     }
 
     // bind all function bodies
     for (int i = 0; i < members.Count; i++) {
+        if (members.NodeBuffer[i]->Type != FunctionMember) continue;
+
         // create a scope for the function
         Scope *funcScope = &(Scope) {
                 0, 0, 0, rootScope
@@ -59,6 +66,26 @@ BoundProgram *BindMembers(NodeList members) {
         Binder *fncBin = &(Binder) {
                 functionSymbols[i], funcScope,
         };
+
+        // register all the function's parameters in the scope
+        for (int ii = 0; ii < functionSymbols[i]->Parameters.Count; ii++) {
+            if (!TryRegisterSymbol(funcScope, functionSymbols[i]->Parameters.Symbols[ii]))
+                Die("Could not register parameter %s. A symbol with that name already exists.", functionSymbols[i]->Parameters.Symbols[ii]->Name);
+        }
+
+        // register vargs collector
+        if (functionSymbols[i]->Collector != NULL)
+        {
+            // create a parameter symbol for the collector
+            ParameterSymbol *collector = GC_MALLOC(sizeof(ParameterSymbol));
+            collector->UniqueId = GetUniqueId();
+            collector->base.Type = VArgs;
+            collector->base.base.Name = functionSymbols[i]->Collector;
+
+            if (!TryRegisterSymbol(funcScope, collector))
+                Die("Could not register parameter %s. A symbol with that name already exists.", functionSymbols[i]->Collector);
+        }
+
 
         // bind the body
         functionBodies[i] = BindStatement(fncBin, ((FunctionMemberNode*)members.NodeBuffer[i])->Body);
@@ -101,6 +128,16 @@ FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc) {
         parameters[i]->base.Type = paramType;
     }
 
+    char *collector = NULL;
+    if (fnc->IsVariadic) {
+        if (fnc->Parameters->Count == 0)
+            Die("A variadic function needs at least one non-variadic parameter!");
+
+        if (fnc->HasCollector) {
+            collector = fnc->Collector.Text;
+        }
+    }
+
     SymbolList parameterList;
     parameterList.Count = fnc->Parameters->Count;
     parameterList.Symbols = GC_MALLOC(sizeof(ParameterSymbol*) * fnc->Parameters->Count);
@@ -111,6 +148,58 @@ FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc) {
     me->base.Name = fnc->Identifier.Text;
     me->ReturnType = returnType;
     me->Parameters = parameterList;
+
+    me->Variadic = fnc->IsVariadic;
+    me->Collector = collector;
+
+    me->External = false;
+
+    return me;
+}
+
+FunctionSymbol *BindExternalFunctionDeclaration(Binder *bin, ExternalFunctionMemberNode *fnc) {
+    TypeSymbol *returnType;
+
+    if (fnc->ReturnType == NULL) // no type clause -> void
+        returnType = Void;
+    else
+        returnType = LookupType(bin, fnc->ReturnType, true);
+
+
+    ParameterSymbol *parameters[fnc->Parameters->Count];
+
+    for (int i = 0; i < fnc->Parameters->Count; i++) {
+        // wat typ?
+        TypeSymbol *paramType = LookupType(bin, fnc->Parameters->Parameters[i]->TypeClause, false);
+
+        // create a parameter symbol
+        parameters[i] = GC_MALLOC(sizeof(ParameterSymbol));
+        parameters[i]->base.Type = ParameterSymbolType;
+        parameters[i]->base.base.Name = fnc->Parameters->Parameters[i]->Identifier.Text;
+
+        parameters[i]->UniqueId = GetUniqueId();
+        parameters[i]->Ordinal = i;
+        parameters[i]->base.Type = paramType;
+    }
+
+    if (fnc->IsVariadic) {
+        if (fnc->Parameters->Count == 0)
+            Die("A variadic function needs at least one non-variadic parameter!");
+    }
+
+    SymbolList parameterList;
+    parameterList.Count = fnc->Parameters->Count;
+    parameterList.Symbols = GC_MALLOC(sizeof(ParameterSymbol*) * fnc->Parameters->Count);
+    memcpy(parameterList.Symbols, parameters, sizeof(ParameterSymbol*) * fnc->Parameters->Count);
+
+    FunctionSymbol *me = GC_MALLOC(sizeof(FunctionSymbol));
+    me->base.Type = FunctionSymbolType;
+    me->base.Name = fnc->Identifier.Text;
+    me->ReturnType = returnType;
+    me->Parameters = parameterList;
+
+    me->Variadic = fnc->IsVariadic;
+    me->External = true;
 
     return me;
 }
@@ -362,13 +451,15 @@ BoundCallExpressionNode *BindCallExpression(Binder *bin, CallExpressionNode *exp
     if (func == NULL)
         Die("Couldnt find your stupid ass function (%s)", expr->Identifier.Text);
 
-    if (func->Parameters.Count != expr->Arguments.Count)
-        Die("Function %s expects %d arguments but got %d!", func->base.Name, func->Parameters.Count, expr->Arguments.Count);
+    if (!func->Variadic && expr->Arguments.Count != func->Parameters.Count ||
+         func->Variadic && expr->Arguments.Count <  func->Parameters.Count)
+        Die("Function %s expects %s %d argument(s) but got %d!", func->base.Name, func->Variadic ? "at least" : "exactly", func->Parameters.Count, expr->Arguments.Count);
 
     BoundExpressionNode *args[expr->Arguments.Count];
     for (int i = 0; i < expr->Arguments.Count; i++) {
         args[i] = BindExpression(bin, expr->Arguments.NodeBuffer[i]);
 
+        if (i < func->Parameters.Count)
         if (!typcmp(((ParameterSymbol*)func->Parameters.Symbols[i])->base.Type, args[i]->Type))
             Die("Arguments types dont match for function %s!", func->base.Name);
     }
@@ -506,6 +597,9 @@ TypeSymbol *LookupPrimitiveType(Binder *bin, char *name, bool allowLookupFailing
 
     if (strcmp(name, "void") == 0)
         return Void;
+
+    if (strcmp(name, "vargs") == 0)
+        return VArgs;
 
     // no fucking clue what this type is supposed to be
     if (!allowLookupFailing)

@@ -31,6 +31,7 @@
 #include "Nodes/Statements/ContinueStatement/continuestatement.h"
 #include "Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
 #include "../Parsing/Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
+#include "../Parsing/Nodes/Members/ExternalFunctionMember/external.h"
 
 // ============================================================================
 // ENUMS
@@ -78,6 +79,7 @@ struct BOUND_PROGRAM {
 // ============================================================================
 BoundProgram *BindMembers(NodeList members);
 FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc);
+FunctionSymbol *BindExternalFunctionDeclaration(Binder *bin, ExternalFunctionMemberNode *fnc);
 
 BoundNode *BindStatement(Binder *bin, Node *stmt);
 BoundIfStatementNode *BindIfStatement(Binder *bin, IfStatementNode *stmt);

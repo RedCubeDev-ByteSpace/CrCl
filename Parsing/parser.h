@@ -29,6 +29,7 @@ typedef enum NODE_TYPE {
     // Members
     GlobalMember,
     FunctionMember,
+    ExternalFunctionMember,
     StructMember,
     EnumMember,
 
@@ -78,6 +79,7 @@ void AppendMember(Parser *prs, Node *node);
 NodeList Parse(TokenList tokens);
 void ParseMembers(Parser *prs);
 void ParseFunctionDeclaration(Parser *prs);
+void ParseExternalFunctionDeclaration(Parser *prs);
 FunctionParameterList *ParseParameters(Parser *prs);
 FunctionParameter *ParseParameter(Parser *prs);
 TypeClause *ParseTypeClause(Parser *prs);

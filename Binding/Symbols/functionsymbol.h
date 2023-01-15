@@ -13,6 +13,10 @@ typedef struct FUNCTION_SYMBOL {
 
     TypeSymbol *ReturnType;
     SymbolList Parameters;
+    bool Variadic;
+    char *Collector;
+
+    bool External;
 } FunctionSymbol;
 
 #endif //CRCL_FUNCTIONSYMBOL_H

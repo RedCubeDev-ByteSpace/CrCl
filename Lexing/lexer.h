@@ -22,6 +22,8 @@ typedef enum TOKEN_TYPE {
     CloseBracket,     // ]
     LeftArrow,        // <-
     RightArrow,       // ->
+    Collector,        // ~
+    CollectorArrow,   // ~>
     Equals,           // =
     Unequals,         // !=
     GreaterThan,      // >
@@ -44,6 +46,7 @@ typedef enum TOKEN_TYPE {
 
     // Keywords
     FuncKeyword,
+    ExtKeyword,
     LocalKeyword,
     GlobalKeyword,
     ReturnKeyword,

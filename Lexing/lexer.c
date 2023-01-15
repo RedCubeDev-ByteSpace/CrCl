@@ -252,6 +252,15 @@ void LexSymbol(Lexer *lxr) {
             break;
         case '/': type = Slash; break;
         case '*': type = Star; break;
+        case '~':
+            if (PeekChar(lxr, 1) == '>') {
+                type = CollectorArrow;
+                tokenLength = 2;
+                break;
+            }
+
+            type = Collector;
+            break;
     }
 
     // we found a character we dont know
@@ -281,6 +290,8 @@ TokenType ClassifyKeyword(char *text) {
     // is this a keyword?
     if (strcmp(text, "func") == 0)
         return FuncKeyword;
+    else if (strcmp(text, "ext") == 0)
+        return ExtKeyword;
     else if (strcmp(text, "local") == 0)
         return LocalKeyword;
     else if (strcmp(text, "global") == 0)

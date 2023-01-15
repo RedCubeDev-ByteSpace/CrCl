@@ -31,6 +31,7 @@ void EmitBreakStatement(Emitter *emt, BoundBreakStatementNode *stmt);
 void EmitContinueStatement(Emitter *emt, BoundContinueStatementNode *stmt);
 void EmitLocalStatement(Emitter *emt, BoundLocalStatementNode *stmt);
 void EmitBlockStatement(Emitter *emt, BoundBlockStatementNode *stmt);
+void EmitBlockStatementInternal(Emitter *emt, BoundBlockStatementNode *stmt);
 void EmitExpressionStatement(Emitter *emt, BoundExpressionStatementNode *stmt);
 
 char *EmitExpression(Emitter *emt, BoundExpressionNode *expr);

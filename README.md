@@ -15,17 +15,15 @@ This language is basically C but the way I'd like C to be (which explains all th
 ### Example
 ```c
 func main() int32 {
-    PrintHelloWorld();
+    println("Hello World!");
     return 0;
 }
 
-func PrintHelloWorld() {
-    puts("Hello world!");
+func println(msg ptr[int8]) {
+    printf("%s\n", msg);
 }
 
-// CrCl is very early in development and does not yet have a way of referencing external functions
-// so best i can do is declare it with an empty body and remove the definition from the C output later
-func puts(msg ptr[int8]) {}
+ext printf(fmt ptr[int8], ~);
 ```
 
 The piece of code above generates the following C-code:
@@ -34,26 +32,20 @@ The piece of code above generates the following C-code:
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 int32_t main();
-void PrintHelloWorld();
-void puts(int8_t* msg);
+void println(int8_t* msg);
+void printf(int8_t* fmt, ...);
 
-int32_t main()
-{
-    (PrintHelloWorld());
+int32_t main() {
+    (println(("Hello World!")));
     return (0);
 }
 
-void PrintHelloWorld()
-{
-    (puts(("Hello world!")));
+void println(int8_t* msg) {
+    (printf(("%s\n"), (msg)));
 }
-
-// manually commented out be me because of the missing feature i mentioned above
-// void puts(int8_t* msg)
-// {
-// }
 ```
 
 Yes I wrote an entire compiler to fuck around with a calculator.

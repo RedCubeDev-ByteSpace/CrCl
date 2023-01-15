@@ -5,10 +5,10 @@
 #ifndef CRCL_FUNCTION_H
 #define CRCL_FUNCTION_H
 
+#include <stdbool.h>
 #include "../../node.h"
 #include "../../typeclause.h"
 #include "../../Statements/BlockStatement/blockstatement.h"
-
 
 typedef struct FUNCTION_PARAMETER {
     Token Identifier;
@@ -26,6 +26,10 @@ typedef struct FUNCTION_MEMBER_NODE {
     Token Identifier;
     FunctionParameterList *Parameters;
     TypeClause *ReturnType;
+    bool IsVariadic;
+
+    bool HasCollector;
+    Token Collector;
 
     BlockStatementNode *Body;
 

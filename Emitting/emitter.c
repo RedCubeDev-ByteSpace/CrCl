@@ -13,7 +13,7 @@ char *EmitProgram(BoundProgram *prg) {
         0, 0, prg
     };
 
-    char *start = "//crcl generated code\n#include <stdint.h>\n#include <stdbool.h>\n#include <stddef.h>\n\n";
+    char *start = "//crcl generated code\n#include <stdint.h>\n#include <stdbool.h>\n#include <stddef.h>\n#include <stdarg.h>\n\n";
     emt->Code = GC_MALLOC(strlen(start));
     memcpy(emt->Code, start, strlen(start));
 
@@ -24,6 +24,7 @@ char *EmitProgram(BoundProgram *prg) {
     CodeAppend(emt, "\n");
 
     for (int i = 0; i < prg->FunctionCount; i++) {
+        if (!prg->FunctionSymbols[i]->External)
         EmitFunction(emt, prg->FunctionSymbols[i], prg->FunctionBodies[i]);
     }
 
@@ -37,8 +38,25 @@ void EmitFunctionDeclaration(Emitter *emt, FunctionSymbol *sym, BoundBlockStatem
 
 void EmitFunction(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body) {
     EmitFunctionSignature(emt, sym, body);
-    CodeAppend(emt,"\n");
-    EmitBlockStatement(emt, body);
+    CodeAppend(emt," {\n");
+    emt->Indentation++;
+
+    if (sym->Collector != NULL) {
+        Indent(emt);
+        CodeAppend(emt, "va_list ");
+        CodeAppend(emt, sym->Collector);
+        CodeAppend(emt, " = va_start(");
+        CodeAppend(emt, sym->Collector);
+        CodeAppend(emt, ",");
+        CodeAppend(emt, sym->Parameters.Symbols[sym->Parameters.Count-1]->Name);
+        CodeAppend(emt, ");\n");
+    }
+
+    EmitBlockStatementInternal(emt, body);
+
+    emt->Indentation--;
+    Indent(emt);
+    CodeAppend(emt, "}\n\n");
 }
 
 void EmitFunctionSignature(Emitter *emt, FunctionSymbol *sym, BoundBlockStatementNode *body) {
@@ -54,6 +72,10 @@ void EmitFunctionSignature(Emitter *emt, FunctionSymbol *sym, BoundBlockStatemen
 
         if (i < sym->Parameters.Count -1)
             CodeAppend(emt, ", ");
+    }
+
+    if (sym->Variadic) {
+        CodeAppend(emt, ", ...");
     }
 
     CodeAppend(emt, ")");
@@ -136,13 +158,17 @@ void EmitBlockStatement(Emitter *emt, BoundBlockStatementNode *stmt) {
     CodeAppend(emt, "{\n");
     emt->Indentation++;
 
-    for (int i = 0; i < stmt->Statements.Count; i++) {
-        EmitStatement(emt, stmt->Statements.Statements[i]);
-    }
+    EmitBlockStatementInternal(emt, stmt);
 
     emt->Indentation--;
     Indent(emt);
     CodeAppend(emt, "}\n\n");
+}
+
+void EmitBlockStatementInternal(Emitter *emt, BoundBlockStatementNode *stmt) {
+    for (int i = 0; i < stmt->Statements.Count; i++) {
+        EmitStatement(emt, stmt->Statements.Statements[i]);
+    }
 }
 
 void EmitExpressionStatement(Emitter *emt, BoundExpressionStatementNode *stmt) {
@@ -274,6 +300,8 @@ char *EmitType(Emitter *emt, TypeSymbol *typ) {
         return "int64_t";
     else if (typcmp(typ, Void))
         return "void";
+    else if (typcmp(typ, VArgs))
+        return "va_list";
 
     if (strcmp(typ->base.Name, "ptr") == 0)
         return StringMerge(EmitType(emt, typ->Subtypes.Symbols[0]), "*");

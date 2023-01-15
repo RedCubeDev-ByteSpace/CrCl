@@ -18,6 +18,8 @@ extern TypeSymbol *Int8Ptr;
 
 extern TypeSymbol *Void;
 
+extern TypeSymbol *VArgs;
+
 void InitBuiltins();
 
 #endif //CRCL_BUILTINS_H

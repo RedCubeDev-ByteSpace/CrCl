@@ -9,7 +9,56 @@
 #include "lexer.h"
 
 char* TokenTypeNames[] = {
-        "Eof", "Semicolon", "Comma","OpenParenthesis","CloseParenthesis","OpenBrace","CloseBrace","OpenBracket","CloseBracket","LeftArrow","RightArrow","Equals","Unequals","GreaterThan","LessThan","GreaterEqual","LessEqual","Not","Pipe","PipePipe","And","AndAnd","Plus","Minus","Slash","Star","String","Number","FuncKeyword","LocalKeyword","GlobalKeyword","ReturnKeyword","IfKeyword", "ElseKeyword", "WhileKeyword","NullKeyword","Identifier"
+        "Eof",
+
+        // Symbols
+        "Semicolon",        // ;
+        "Comma",            // ,
+        "OpenParenthesis",  // (
+        "CloseParenthesis", // )
+        "OpenBrace",        // {
+        "CloseBrace",       // }
+        "OpenBracket",      // [
+        "CloseBracket",     // ]
+        "LeftArrow",        // <-
+        "RightArrow",       // ->
+        "Collector",        // ~
+        "CollectorArrow",   // ~>
+        "Equals",           // =
+        "Unequals",         // !=
+        "GreaterThan",      // >
+        "LessThan",         // <
+        "GreaterEqual",     // >=
+        "LessEqual",        // <=
+        "Not",              // !
+        "Pipe",             // |
+        "PipePipe",         // ||
+        "And",              // &
+        "AndAnd",           // &&
+        "Plus",             // +
+        "Minus",            // -
+        "Slash",            // /
+        "Star",             // *
+
+        // Literals
+        "String",           // "..."
+        "Number",           // 100
+
+        // Keywords
+        "FuncKeyword",
+        "ExtKeyword",
+        "LocalKeyword",
+        "GlobalKeyword",
+        "ReturnKeyword",
+        "IfKeyword",
+        "ElseKeyword",
+        "WhileKeyword",
+        "BreakKeyword",
+        "ContinueKeyword",
+        "NullKeyword",
+
+        // Identifiers
+        "Identifier",
 };
 
 // = ObjHelpers ===============================================================

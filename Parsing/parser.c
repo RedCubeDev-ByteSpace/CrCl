@@ -5,6 +5,7 @@
 #include <string.h>
 #include <gc/gc.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "../Lexing/lexer.h"
 #include "../Error/error.h"
 #include "parser.h"
@@ -22,6 +23,7 @@
 #include "Nodes/Expressions/ParenthesizedExpression/parenthesizedexpression.h"
 #include "Nodes/Statements/BreakStatement/breakstatement.h"
 #include "Nodes/Statements/ContinueStatement/continuestatement.h"
+#include "Nodes/Members/ExternalFunctionMember/external.h"
 
 NodeList Parse(TokenList tokens) {
     Parser *prs = &(Parser) {
@@ -53,6 +55,8 @@ void ParseMembers(Parser *prs) {
     while ((current = CurrentToken(prs)).Type != Eof) {
         if (CurrentToken(prs).Type == FuncKeyword)
             ParseFunctionDeclaration(prs);
+        else if (CurrentToken(prs).Type == ExtKeyword)
+            ParseExternalFunctionDeclaration(prs);
         else
             Die("Expected member, got depression instead. (%s)", TokenTypeNames[CurrentToken(prs).Type]);
     }
@@ -67,6 +71,23 @@ void ParseFunctionDeclaration(Parser *prs) {
 
     Consume(prs, OpenParenthesis);  // (
     FunctionParameterList *params = ParseParameters(prs);
+
+    bool isVariadic   = false;
+    bool isCollecting = false;
+    Token collectorToken;
+
+    if (CurrentToken(prs).Type == Collector)
+    {
+        Consume(prs, Collector);
+        isVariadic = true;
+    }
+    else if (CurrentToken(prs).Type == CollectorArrow) {
+        isVariadic     = true;
+        isCollecting   = true;
+        Consume(prs, CollectorArrow);
+        collectorToken = Consume(prs, Identifier);
+    }
+
     Consume(prs, CloseParenthesis); // )
 
     // function return type
@@ -79,10 +100,57 @@ void ParseFunctionDeclaration(Parser *prs) {
 
     FunctionMemberNode *mem = GC_MALLOC(sizeof(FunctionMemberNode));
     mem->base = (Node) {FunctionMember};
-    mem->Identifier = identifier;
-    mem->Parameters = params;
-    mem->ReturnType = returnType;
-    mem->Body       = body;
+    mem->Identifier   = identifier;
+    mem->Parameters   = params;
+    mem->ReturnType   = returnType;
+    mem->Body         = body;
+    mem->IsVariadic   = isVariadic;
+    mem->HasCollector = isCollecting;
+    mem->Collector    = collectorToken;
+
+    AppendMember(prs, mem);
+}
+
+void ParseExternalFunctionDeclaration(Parser *prs) {
+    // func keyword
+    Consume(prs, ExtKeyword);
+
+    // function name
+    Token identifier = Consume(prs, Identifier);
+
+    Consume(prs, OpenParenthesis);  // (
+    FunctionParameterList *params = ParseParameters(prs);
+
+    bool isVariadic   = false;
+
+    if (CurrentToken(prs).Type == Collector)
+    {
+        Consume(prs, Collector);
+        isVariadic = true;
+    }
+    else if (CurrentToken(prs).Type == CollectorArrow) {
+        isVariadic     = true;
+        Consume(prs, CollectorArrow);
+        Consume(prs, Identifier);
+    }
+
+    Consume(prs, CloseParenthesis); // )
+
+    // function return type
+    TypeClause *returnType = NULL;
+
+    if (CurrentToken(prs).Type == Identifier)
+        returnType = ParseTypeClause(prs);
+
+    if (CurrentToken(prs).Type == Semicolon)
+        Consume(prs, Semicolon);
+
+    ExternalFunctionMemberNode *mem = GC_MALLOC(sizeof(ExternalFunctionMemberNode));
+    mem->base = (Node) {ExternalFunctionMember};
+    mem->Identifier   = identifier;
+    mem->Parameters   = params;
+    mem->ReturnType   = returnType;
+    mem->IsVariadic   = isVariadic;
 
     AppendMember(prs, mem);
 }
@@ -105,6 +173,11 @@ FunctionParameterList *ParseParameters(Parser *prs) {
 
         // coma :)
         Consume(prs, Comma);
+
+        // check if we got a Collector or CollectorArrow
+        // these are not handled by this function
+        if (CurrentToken(prs).Type == Collector || CurrentToken(prs).Type == CollectorArrow)
+            break;
     }
 
     // allocate some space for this and hand it back
