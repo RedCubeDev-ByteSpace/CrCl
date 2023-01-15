@@ -4,7 +4,7 @@ CrCl source file ---> [CrCl StS Compiler] ---> C source file
 ```
 
 CrCl is a low level language very similar to ReCT in style. While ReCT compiles down to LLVM, CrCl compiles to the poor 
-man's intermediate language C.  
+man's intermediate language: C.  
 I started this project because I wanted to run ReCT on a calculator, but it was just too heavy, so I decided to make this
 second language for that purpose.  
 That is also why I decided to compile to C instead of LLVM as LLVM does not currently have a backend to compile to the 
