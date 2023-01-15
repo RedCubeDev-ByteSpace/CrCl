@@ -2,10 +2,10 @@ func main() int32 {
 
     {
         local a <- 100;
-        someFunc(a);
+        //someFunc(a);
     }
 
-    someFunc(a);
+    //someFunc(a);
 
     local ptr[int8] b;
 

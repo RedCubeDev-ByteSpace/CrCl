@@ -28,6 +28,54 @@
 // =====================================================================================================================
 // Mehmborhs
 // =====================================================================================================================
+BoundProgram *BindMembers(NodeList members) {
+    // create a root (global) scope
+    Scope *rootScope = &(Scope) {
+            0, 0, 0, 0
+    };
+
+    // create a new root binder
+    Binder *bin = &(Binder) {
+            0, rootScope,
+    };
+
+    FunctionSymbol  *functionSymbols[members.Count];
+    BoundBlockStatementNode *functionBodies[members.Count];
+
+    // declare all functions
+    for (int i = 0; i < members.Count; i++) {
+        functionSymbols[i] = BindFunctionDeclaration(bin, members.NodeBuffer[i]);
+        TryRegisterSymbol(rootScope, functionSymbols[i]);
+    }
+
+    // bind all function bodies
+    for (int i = 0; i < members.Count; i++) {
+        // create a scope for the function
+        Scope *funcScope = &(Scope) {
+                0, 0, 0, rootScope
+        };
+
+        // create a binder for the function
+        Binder *fncBin = &(Binder) {
+                functionSymbols[i], funcScope,
+        };
+
+        // bind the body
+        functionBodies[i] = BindStatement(fncBin, ((FunctionMemberNode*)members.NodeBuffer[i])->Body);
+    }
+
+    // put all of our results into a bound program object
+    BoundProgram *boundProgram = GC_MALLOC(sizeof(BoundProgram));
+    boundProgram->FunctionSymbols = GC_malloc(sizeof(FunctionSymbol*) * members.Count);
+    boundProgram->FunctionBodies = GC_malloc(sizeof(BoundBlockStatementNode*) * members.Count);
+    boundProgram->FunctionCount = members.Count;
+
+    memcpy(boundProgram->FunctionSymbols, functionSymbols, sizeof(FunctionSymbol*) * members.Count);
+    memcpy(boundProgram->FunctionBodies, functionBodies, sizeof(BoundBlockStatementNode*) * members.Count);
+
+    return boundProgram;
+}
+
 FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc) {
     TypeSymbol *returnType;
 
@@ -41,12 +89,12 @@ FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc) {
 
     for (int i = 0; i < fnc->Parameters->Count; i++) {
         // wat typ?
-        TypeSymbol *paramType = LookupType(bin, fnc->Parameters->Parameters[i].TypeClause, false);
+        TypeSymbol *paramType = LookupType(bin, fnc->Parameters->Parameters[i]->TypeClause, false);
 
         // create a parameter symbol
         parameters[i] = GC_MALLOC(sizeof(ParameterSymbol));
         parameters[i]->base.Type = ParameterSymbolType;
-        parameters[i]->base.base.Name = fnc->Parameters->Parameters[i].Identifier.Text;
+        parameters[i]->base.base.Name = fnc->Parameters->Parameters[i]->Identifier.Text;
 
         parameters[i]->UniqueId = GetUniqueId();
         parameters[i]->Ordinal = i;

@@ -61,15 +61,23 @@ typedef enum BOUND_NODE_TYPE {
 // ============================================================================
 
 typedef struct BINDER Binder;
+typedef struct BOUND_PROGRAM BoundProgram;
 
 struct BINDER {
     FunctionSymbol *CurrentFunction;
     Scope *ActiveScope;
 };
 
+struct BOUND_PROGRAM {
+    FunctionSymbol **FunctionSymbols;
+    BoundBlockStatementNode **FunctionBodies;
+    int FunctionCount;
+};
+
 // ============================================================================
 // Cool ass functions
 // ============================================================================
+BoundProgram *BindMembers(NodeList members);
 FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc);
 
 BoundNode *BindStatement(Binder *bin, Node *stmt);

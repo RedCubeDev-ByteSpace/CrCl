@@ -109,8 +109,9 @@ FunctionParameterList *ParseParameters(Parser *prs) {
 
     // allocate some space for this and hand it back
     FunctionParameterList *me = GC_MALLOC(sizeof(FunctionParameterList*));
-    me->Parameters = GC_MALLOC(index * sizeof(FunctionParameterList*));
-    memcpy(me->Parameters, parameters, index * sizeof(FunctionParameterList*));
+    me->Parameters = GC_MALLOC(index * sizeof(FunctionParameter*));
+
+    for(int i = 0; i < index; i++) me->Parameters[i] = parameters[i];
     me->Count = index;
 
     // don

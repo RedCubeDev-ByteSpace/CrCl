@@ -71,33 +71,7 @@ int main(int argc, char** argv) {
     InitBuiltins();
     InitOperators();
 
-    Scope *rootScope = &(Scope) {
-        0, 0, 0, 0
-    };
-
-    Binder *bin = &(Binder) {
-        0, rootScope,
-    };
-
-    FunctionSymbol *functions[nodes.Count];
-    BoundBlockStatementNode *bodies[nodes.Count];
-
-    for (int i = 0; i < nodes.Count; i++) {
-        functions[i] = BindFunctionDeclaration(bin, nodes.NodeBuffer[i]);
-        TryRegisterSymbol(rootScope, functions[i]);
-    }
-
-    for (int i = 0; i < nodes.Count; i++) {
-        Scope *funcScope = &(Scope) {
-                0, 0, 0, rootScope
-        };
-
-        Binder *fncBin = &(Binder) {
-                functions[i], funcScope,
-        };
-
-        bodies[i] = BindStatement(fncBin, ((FunctionMemberNode*)nodes.NodeBuffer[i])->Body);
-    }
+    BoundProgram *boundProgram = BindMembers(nodes);
 
     // The exit status of a process in computer programming is a small number passed from a child process (or callee) to a parent process (or caller)
     // when it has finished executing a specific procedure or delegated task. In DOS, this may be referred to as an error level.

@@ -16,7 +16,7 @@ typedef struct FUNCTION_PARAMETER {
 } FunctionParameter;
 
 typedef struct FUNCTION_PARAMETER_LIST {
-    FunctionParameter *Parameters;
+    FunctionParameter **Parameters;
     int Count;
 } FunctionParameterList;
 
