@@ -7,15 +7,15 @@
 
 #include "symbol.h"
 #include "typesymbol.h"
+#include "variablesymbol.h"
 
 typedef struct PARAMETER_SYMBOL ParameterSymbol;
 
 struct PARAMETER_SYMBOL {
-    Symbol base;
+    VariableSymbol base;
 
     int UniqueId;
     int Ordinal;
-    TypeSymbol *Type;
 };
 
 #endif //CRCL_PARAMETERSYMBOL_H

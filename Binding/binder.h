@@ -20,6 +20,17 @@
 #include "Nodes/Statements/BlockStatement/blockstatement.h"
 #include "Nodes/Statements/ExpressionStatement/expressionstatement.h"
 #include "../Parsing/Nodes/Statements/ExpressionStatement/expressionstatement.h"
+#include "Nodes/Expressions/LiteralExpression/literalexpression.h"
+#include "../Parsing/Nodes/Expressions/LiteralExpression/literalexpression.h"
+#include "Nodes/Expressions/CallExpression/callexpression.h"
+#include "../Parsing/Nodes/Expressions/CallExpression/callexpression.h"
+#include "Nodes/Expressions/NameExpression/nameexpression.h"
+#include "../Parsing/Nodes/Expressions/NameExpression/nameexpression.h"
+#include "Nodes/Expressions/BinaryExpression/binaryexpression.h"
+#include "Nodes/Statements/BreakStatement/breakstatement.h"
+#include "Nodes/Statements/ContinueStatement/continuestatement.h"
+#include "Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
+#include "../Parsing/Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
 
 // ============================================================================
 // ENUMS
@@ -29,6 +40,8 @@ typedef enum BOUND_NODE_TYPE {
     BoundIfStatement,
     BoundReturnStatement,
     BoundWhileStatement,
+    BoundBreakStatement,
+    BoundContinueStatement,
     BoundVariableDeclarationStatement,
     BoundBlockStatement,
     BoundExpressionStatement,
@@ -36,6 +49,7 @@ typedef enum BOUND_NODE_TYPE {
     // Expressions
     BoundParenthesizedExpression,
     BoundLiteralExpression,
+    BoundAssignmentExpression,
     BoundCallExpression,
     BoundNameExpression,
     BoundUnaryExpression,
@@ -62,11 +76,18 @@ BoundNode *BindStatement(Binder *bin, Node *stmt);
 BoundIfStatementNode *BindIfStatement(Binder *bin, IfStatementNode *stmt);
 BoundReturnStatementNode *BindReturnStatement(Binder *bin, ReturnStatementNode *stmt);
 BoundWhileStatementNode *BindWhileStatement(Binder *bin, WhileStatementNode *stmt);
+BoundBreakStatementNode *BindBreakStatement(Binder *bin, WhileStatementNode *stmt);
+BoundContinueStatementNode *BindContinueStatement(Binder *bin, WhileStatementNode *stmt);
 BoundLocalStatementNode *BindLocalStatement(Binder *bin, LocalStatementNode *stmt);
 BoundBlockStatementNode *BindBlockStatement(Binder *bin, BlockStatementNode *stmt);
 BoundExpressionStatementNode *BindExpressionStatement(Binder *bin, ExpressionStatementNode *stmt);
 
 BoundExpressionNode *BindExpression(Binder *bin, Node *expr);
+BoundLiteralExpressionNode *BindLiteralExpression(Binder *bin, LiteralExpressionNode *expr);
+BoundAssignmentExpressionNode *BindAssignmentExpression(Binder *bin, AssignmentExpressionNode *expr);
+BoundCallExpressionNode *BindCallExpression(Binder *bin, CallExpressionNode *expr);
+BoundNameExpressionNode *BindNameExpression(Binder *bin, NameExpressionNode *expr);
+BoundBinaryExpressionNode *BindBinaryExpression(Binder *bin, BinaryExpressionNode *expr);
 
 TypeSymbol *LookupType(Binder *bin, TypeClause *clause, bool allowLookupFailing);
 TypeSymbol *LookupPrimitiveType(Binder *bin, char *name, bool allowLookupFailing);

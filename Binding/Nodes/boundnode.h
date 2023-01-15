@@ -5,6 +5,8 @@
 #ifndef CRCL_BOUNDNODE_H
 #define CRCL_BOUNDNODE_H
 
+#include "../Symbols/typesymbol.h"
+
 typedef struct BOUND_NODE BoundNode;
 typedef struct BOUND_NODE_LIST BoundNodeList;
 typedef struct BOUND_EXPRESSION_NODE BoundExpressionNode;

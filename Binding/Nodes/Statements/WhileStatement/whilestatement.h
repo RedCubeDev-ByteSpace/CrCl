@@ -10,7 +10,7 @@
 typedef struct BOUND_WHILE_STATEMENT_NODE {
     BoundNode base;
 
-    BoundNode *Condition;
+    BoundExpressionNode *Condition;
     BoundNode *Body;
 } BoundWhileStatementNode;
 

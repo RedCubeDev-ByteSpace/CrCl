@@ -10,6 +10,8 @@ TypeSymbol *Int16;
 TypeSymbol *Int32;
 TypeSymbol *Int64;
 
+TypeSymbol *Int8Ptr;
+
 TypeSymbol *Void;
 
 void InitBuiltins() {
@@ -41,6 +43,13 @@ void InitBuiltins() {
     Int64->base.Type = TypeSymbolType;
     Int64->base.Name = "int64";
     Int64->Subtypes = (TypeSymbolList) {0, 0};
+
+    Int8Ptr = GC_MALLOC(sizeof(TypeSymbol));
+    Int8Ptr->base.Type = TypeSymbolType;
+    Int8Ptr->base.Name = "ptr";
+    Int8Ptr->Subtypes = (TypeSymbolList) {0, 1};
+    Int8Ptr->Subtypes.Symbols = GC_MALLOC(sizeof(TypeSymbol*));
+    Int8Ptr->Subtypes.Symbols[0] = Int8;
 
     // cum
     Void = GC_MALLOC(sizeof(TypeSymbol));

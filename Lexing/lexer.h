@@ -50,6 +50,8 @@ typedef enum TOKEN_TYPE {
     IfKeyword,
     ElseKeyword,
     WhileKeyword,
+    BreakKeyword,
+    ContinueKeyword,
     NullKeyword,
 
     // Identifiers

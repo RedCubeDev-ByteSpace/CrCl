@@ -19,6 +19,8 @@
 #include "Nodes/Expressions/CallExpression/callexpression.h"
 #include "Nodes/Expressions/BinaryExpression/binaryexpression.h"
 #include "Nodes/Expressions/ParenthesizedExpression/parenthesizedexpression.h"
+#include "Nodes/Statements/BreakStatement/breakstatement.h"
+#include "Nodes/Statements/ContinueStatement/continuestatement.h"
 
 // ============================================================================
 // ENUMS
@@ -34,6 +36,8 @@ typedef enum NODE_TYPE {
     IfStatement,
     ReturnStatement,
     WhileStatement,
+    BreakStatement,
+    ContinueStatement,
     VariableDeclarationStatement,
     BlockStatement,
     ExpressionStatement,
@@ -41,6 +45,7 @@ typedef enum NODE_TYPE {
     // Expressions
     ParenthesizedExpression,
     LiteralExpression,
+    AssignmentExpression,
     CallExpression,
     NameExpression,
     UnaryExpression,
@@ -83,6 +88,8 @@ IfStatementNode *ParseIfStatement(Parser *prs);
 LocalStatementNode *ParseLocalStatement(Parser *prs);
 ReturnStatementNode *ParseReturnStatement(Parser *prs);
 WhileStatementNode *ParseWhileStatement(Parser *prs);
+BreakStatementNode *ParseBreakStatement(Parser *prs);
+ContinueStatementNode *ParseContinueStatement(Parser *prs);
 ExpressionStatementNode *ParseExpressionStatement(Parser *prs);
 
 Node *ParseExpression(Parser *prs);

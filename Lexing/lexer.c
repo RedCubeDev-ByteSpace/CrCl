@@ -293,6 +293,10 @@ TokenType ClassifyKeyword(char *text) {
         return ElseKeyword;
     else if (strcmp(text, "while") == 0)
         return WhileKeyword;
+    else if (strcmp(text, "break") == 0)
+        return BreakKeyword;
+    else if (strcmp(text, "continue") == 0)
+        return ContinueKeyword;
     else if (strcmp(text, "NULL") == 0)
         return NullKeyword;
 

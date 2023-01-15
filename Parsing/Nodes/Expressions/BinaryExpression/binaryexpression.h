@@ -6,6 +6,7 @@
 #define CRCL_BINARYEXPRESSION_H
 
 #include "../../node.h"
+#include "../../../../Lexing/lexer.h"
 
 typedef enum BINARY_OPERATOR {
     PlusOperator,

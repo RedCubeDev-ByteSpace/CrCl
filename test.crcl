@@ -1,19 +1,24 @@
 func main() int32 {
-    //local a <- 100;
+
+    {
+        local a <- 100;
+        someFunc(a);
+    }
+
+    someFunc(a);
+
     local ptr[int8] b;
 
     while (b = NULL) {
-        b = someFunc();
-
         if (b != NULL) break;
     }
 
-    //local c <- "string moment";
+    local c <- "string moment";
 
     return 0;
 }
 
-func someFunc(someParam bool) {
+func someFunc(someParam bool) ptr[int8] {
 
 }
 

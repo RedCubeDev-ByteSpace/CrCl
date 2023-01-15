@@ -17,6 +17,13 @@
 #include "Nodes/Statements/LocalStatement/localstatement.h"
 #include "Nodes/Statements/BlockStatement/blockstatement.h"
 #include "Nodes/Statements/ExpressionStatement/expressionstatement.h"
+#include "Nodes/Expressions/LiteralExpression/literalexpression.h"
+#include "Nodes/Expressions/CallExpression/callexpression.h"
+#include "Nodes/Expressions/NameExpression/nameexpression.h"
+#include "Nodes/Expressions/BinaryExpression/binaryexpression.h"
+#include "Nodes/Statements/BreakStatement/breakstatement.h"
+#include "Nodes/Statements/ContinueStatement/continuestatement.h"
+#include "Nodes/Expressions/AssignmentExpression/assignmentexpression.h"
 
 // =====================================================================================================================
 // Mehmborhs
@@ -39,11 +46,11 @@ FunctionSymbol *BindFunctionDeclaration(Binder *bin, FunctionMemberNode *fnc) {
         // create a parameter symbol
         parameters[i] = GC_MALLOC(sizeof(ParameterSymbol));
         parameters[i]->base.Type = ParameterSymbolType;
-        parameters[i]->base.Name = fnc->Parameters->Parameters[i].Identifier.Text;
+        parameters[i]->base.base.Name = fnc->Parameters->Parameters[i].Identifier.Text;
 
         parameters[i]->UniqueId = GetUniqueId();
         parameters[i]->Ordinal = i;
-        parameters[i]->Type = paramType;
+        parameters[i]->base.Type = paramType;
     }
 
     SymbolList parameterList;
@@ -71,6 +78,10 @@ BoundNode *BindStatement(Binder *bin, Node *stmt) {
             return BindReturnStatement(bin, stmt);
         case WhileStatement:
             return BindWhileStatement(bin, stmt);
+        case BreakStatement:
+            return BindBreakStatement(bin, stmt);
+        case ContinueStatement:
+            return BindContinueStatement(bin, stmt);
         case VariableDeclarationStatement:
             return BindLocalStatement(bin, stmt);
         case BlockStatement:
@@ -84,7 +95,12 @@ BoundNode *BindStatement(Binder *bin, Node *stmt) {
 }
 
 BoundIfStatementNode *BindIfStatement(Binder *bin, IfStatementNode *stmt) {
-    BoundNode *condition = BindExpression(bin, stmt->Condition);
+    BoundExpressionNode *condition = BindExpression(bin, stmt->Condition);
+
+    if (!typcmp(condition->Type, Boolean)) {
+        Die("Expression inside if statement needs to be of type bool!");
+    }
+
     BoundNode *thenBlock = BindStatement(bin, stmt->ThenBlock);
     BoundNode *elseBlock = NULL;
 
@@ -101,9 +117,20 @@ BoundIfStatementNode *BindIfStatement(Binder *bin, IfStatementNode *stmt) {
 }
 
 BoundReturnStatementNode *BindReturnStatement(Binder *bin, ReturnStatementNode *stmt) {
-    BoundNode *returnValue = NULL;
+    if (typcmp(bin->CurrentFunction->ReturnType, Void)) {
+        if (stmt->ReturnValue != NULL)
+            Die("Return value given in a void function!");
+    } else {
+        if (stmt->ReturnValue == NULL)
+            Die("No return value given in a non-void function!");
+    }
+
+    BoundExpressionNode *returnValue = NULL;
     if (stmt->ReturnValue != NULL)
         returnValue = BindExpression(bin, stmt->ReturnValue);
+
+    if (!typcmp(returnValue->Type, bin->CurrentFunction->ReturnType))
+        Die("Function return value type doesnt match its return type!");
 
     BoundReturnStatementNode *me = GC_MALLOC(sizeof(BoundReturnStatementNode));
     me->base.Type = BoundReturnStatement;
@@ -113,14 +140,31 @@ BoundReturnStatementNode *BindReturnStatement(Binder *bin, ReturnStatementNode *
 }
 
 BoundWhileStatementNode *BindWhileStatement(Binder *bin, WhileStatementNode *stmt) {
-    BoundNode *condition = BindExpression(bin, stmt->Condition);
+    BoundExpressionNode *condition = BindExpression(bin, stmt->Condition);
+
+    if (!typcmp(condition->Type, Boolean)) {
+        Die("Expression inside while statement needs to be of type bool!");
+    }
+
     BoundNode *body = BindStatement(bin, stmt->Body);
 
     BoundWhileStatementNode *me = GC_MALLOC(sizeof(BoundWhileStatementNode));
-    me->base.Type = BoundReturnStatement;
+    me->base.Type = BoundWhileStatement;
     me->Condition = condition;
     me->Body = body;
 
+    return me;
+}
+
+BoundBreakStatementNode *BindBreakStatement(Binder *bin, WhileStatementNode *stmt) {
+    BoundBreakStatementNode *me = GC_MALLOC(sizeof(BoundBreakStatementNode));
+    me->base.Type = BoundBreakStatement;
+    return me;
+}
+
+BoundContinueStatementNode *BindContinueStatement(Binder *bin, WhileStatementNode *stmt) {
+    BoundContinueStatementNode *me = GC_MALLOC(sizeof(BoundContinueStatementNode));
+    me->base.Type = BoundContinueStatement;
     return me;
 }
 
@@ -141,13 +185,13 @@ BoundLocalStatementNode *BindLocalStatement(Binder *bin, LocalStatementNode *stm
         varType = initializer->Type;
 
     LocalVariableSymbol *sym = GC_MALLOC(sizeof(LocalVariableSymbol));
-    sym->base.Type = LocalVariableSymbolType;
-    sym->base.Name = stmt->Identifier.Text;
+    sym->base.base.Type = LocalVariableSymbolType;
+    sym->base.base.Name = stmt->Identifier.Text;
     sym->UniqueId = GetUniqueId();
-    sym->Type = varType;
+    sym->base.Type = varType;
 
     if (!TryRegisterSymbol(bin->ActiveScope, sym))
-        Die("Failed to register local variable symbol %s, symbol already exists.", sym->base.Name);
+        Die("Failed to register local variable symbol %s, symbol already exists.", sym->base.base.Name);
 
     BoundLocalStatementNode *me = GC_MALLOC(sizeof(BoundLocalStatementNode));
     me->base.Type = BoundVariableDeclarationStatement;
@@ -190,8 +234,8 @@ BoundBlockStatementNode *BindBlockStatement(Binder *bin, BlockStatementNode *stm
 BoundExpressionStatementNode *BindExpressionStatement(Binder *bin, ExpressionStatementNode *stmt) {
     BoundExpressionNode *expr = BindExpression(bin, stmt->Expression);
 
-    // TODO(redcube): add expression type checking
-    // only call and assignment expressions are allowed to be used like statements
+    if (expr->base.Type != BoundCallExpression && expr->base.Type != BoundAssignmentExpression)
+        Die("Only call and assignment expressions are allowed to be used as statements!");
 
     BoundExpressionStatementNode *me = GC_MALLOC(sizeof(BoundExpressionStatementNode));
     me->base.Type = BoundExpressionStatement;
@@ -204,7 +248,127 @@ BoundExpressionStatementNode *BindExpressionStatement(Binder *bin, ExpressionSta
 // Expressions
 // =====================================================================================================================
 BoundExpressionNode *BindExpression(Binder *bin, Node *expr) {
+    switch (expr->Type) {
+        case ParenthesizedExpression:
+            return BindExpression(bin, ((ParenthesizedExpressionNode*)expr)->Expression);
 
+        case LiteralExpression:
+            return BindLiteralExpression(bin, expr);
+
+        case AssignmentExpression:
+            return BindAssignmentExpression(bin, expr);
+
+        case CallExpression:
+            return BindCallExpression(bin, expr);
+
+        case NameExpression:
+            return BindNameExpression(bin, expr);
+
+        case BinaryExpression:
+            return BindBinaryExpression(bin, expr);
+
+        default:
+            Die("Unknown expression >:( (%d)", expr->Type);
+    }
+}
+
+BoundLiteralExpressionNode *BindLiteralExpression(Binder *bin, LiteralExpressionNode *expr) {
+
+    BoundLiteralExpressionNode *me = GC_MALLOC(sizeof(BoundLiteralExpressionNode));
+    me->base.base.Type = BoundLiteralExpression;
+    me->Value = expr->Literal.Value;
+
+    switch (expr->Literal.Type) {
+        case String:
+            me->base.Type = Int8Ptr; break;
+        case Number:
+            me->base.Type = Int32; break;
+        case NullKeyword:
+            me->base.Type = Int8Ptr; break;
+    }
+
+    return me;
+}
+
+BoundAssignmentExpressionNode *BindAssignmentExpression(Binder *bin, AssignmentExpressionNode *expr) {
+    VariableSymbol *var = TryLookupSymbol(bin->ActiveScope, expr->Identifier.Text);
+    if (var == NULL)
+        Die("Could not find variable '%s' in current scope!", expr->Identifier.Text);
+
+    BoundExpressionNode *value = BindExpression(bin, expr->Value);
+    if (!typcmp(var->Type, value->Type))
+        Die("Variable and value type dont match!");
+
+    BoundAssignmentExpressionNode *me = GC_MALLOC(sizeof(BoundAssignmentExpressionNode));
+    me->base.base.Type = BoundAssignmentExpression;
+    me->base.Type = value->Type;
+    me->Value = value;
+    me->Variable = var;
+
+    return me;
+}
+
+BoundCallExpressionNode *BindCallExpression(Binder *bin, CallExpressionNode *expr) {
+    // lookup function
+    FunctionSymbol *func = TryLookupSymbol(bin->ActiveScope, expr->Identifier.Text);
+    if (func == NULL)
+        Die("Couldnt find your stupid ass function (%s)", expr->Identifier.Text);
+
+    if (func->Parameters.Count != expr->Arguments.Count)
+        Die("Function %s expects %d arguments but got %d!", func->base.Name, func->Parameters.Count, expr->Arguments.Count);
+
+    BoundExpressionNode *args[expr->Arguments.Count];
+    for (int i = 0; i < expr->Arguments.Count; i++) {
+        args[i] = BindExpression(bin, expr->Arguments.NodeBuffer[i]);
+
+        if (!typcmp(((ParameterSymbol*)func->Parameters.Symbols[i])->base.Type, args[i]->Type))
+            Die("Arguments types dont match for function %s!", func->base.Name);
+    }
+
+    BoundNodeList list;
+    list.Count = expr->Arguments.Count;
+    list.NodeBuffer = GC_MALLOC(expr->Arguments.Count * sizeof(BoundExpressionNode*));
+    memcpy(list.NodeBuffer, args, expr->Arguments.Count * sizeof(BoundExpressionNode*));
+
+    BoundCallExpressionNode *me = GC_MALLOC(sizeof(BoundCallExpressionNode));
+    me->base.base.Type = BoundCallExpression;
+    me->base.Type = func->ReturnType;
+    me->Receiver = func;
+    me->Args = list;
+
+    return me;
+}
+
+BoundNameExpressionNode *BindNameExpression(Binder *bin, NameExpressionNode *expr) {
+    // lookup variable
+    VariableSymbol *var = TryLookupSymbol(bin->ActiveScope, expr->Identifier.Text);
+    if (var == NULL)
+        Die("Could not locate variable called %s", expr->Identifier.Text);
+
+    BoundNameExpressionNode *me = GC_MALLOC(sizeof(BoundNameExpressionNode));
+    me->base.base.Type = BoundNameExpression;
+    me->base.Type = var->Type;
+    me->Variable = var;
+
+    return me;
+}
+
+BoundBinaryExpressionNode *BindBinaryExpression(Binder *bin, BinaryExpressionNode *expr) {
+    BoundExpressionNode *left = BindExpression(bin, expr->Left);
+    BoundExpressionNode *right = BindExpression(bin, expr->Right);
+
+    BoundBinaryOperator *op = BindBinaryOperator(expr->Operator, left->Type, right->Type);
+    if (op == NULL)
+        Die("Could not find operator of type %d for types %s and %s!", expr->Operator, left->Type->base.Name, right->Type->base.Name);
+
+    BoundBinaryExpressionNode *me = GC_MALLOC(sizeof(BoundBinaryExpressionNode));
+    me->base.base.Type = BoundBinaryExpression;
+    me->base.Type = op->Result;
+    me->Operator = *op;
+    me->Left = left;
+    me->Right = right;
+
+    return me;
 }
 
 // =====================================================================================================================

@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
 
     // :p:inding
     InitBuiltins();
+    InitOperators();
 
     Scope *rootScope = &(Scope) {
         0, 0, 0, 0
@@ -83,6 +84,7 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < nodes.Count; i++) {
         functions[i] = BindFunctionDeclaration(bin, nodes.NodeBuffer[i]);
+        TryRegisterSymbol(rootScope, functions[i]);
     }
 
     for (int i = 0; i < nodes.Count; i++) {

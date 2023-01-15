@@ -5,6 +5,7 @@
 #ifndef CRCL_TYPESYMBOL_H
 #define CRCL_TYPESYMBOL_H
 
+#include <stdbool.h>
 #include "symbol.h"
 
 typedef struct TYPE_SYMBOL TypeSymbol;
@@ -19,5 +20,7 @@ struct TYPE_SYMBOL {
     Symbol base;
     TypeSymbolList Subtypes;
 };
+
+bool typcmp(TypeSymbol *a, TypeSymbol *b);
 
 #endif //CRCL_TYPESYMBOL_H

@@ -20,6 +20,8 @@
 #include "Nodes/Expressions/BinaryExpression/binaryexpression.h"
 #include "Nodes/Statements/WhileStatement/whilestatement.h"
 #include "Nodes/Expressions/ParenthesizedExpression/parenthesizedexpression.h"
+#include "Nodes/Statements/BreakStatement/breakstatement.h"
+#include "Nodes/Statements/ContinueStatement/continuestatement.h"
 
 NodeList Parse(TokenList tokens) {
     Parser *prs = &(Parser) {
@@ -95,6 +97,7 @@ FunctionParameterList *ParseParameters(Parser *prs) {
     while (CurrentToken(prs).Type != Eof && CurrentToken(prs).Type != CloseParenthesis) {
         // parse a parameter
         parameters[index] = ParseParameter(prs);
+        index++;
 
         // check if we got a comma, if so we'll carry on parsing parameters
         if (CurrentToken(prs).Type != Comma)
@@ -105,7 +108,8 @@ FunctionParameterList *ParseParameters(Parser *prs) {
     }
 
     // allocate some space for this and hand it back
-    FunctionParameterList *me = GC_MALLOC(sizeof(FunctionParameterList));
+    FunctionParameterList *me = GC_MALLOC(sizeof(FunctionParameterList*));
+    me->Parameters = GC_MALLOC(index * sizeof(FunctionParameterList*));
     memcpy(me->Parameters, parameters, index * sizeof(FunctionParameterList*));
     me->Count = index;
 
@@ -189,6 +193,10 @@ Node *ParseStatement(Parser *prs) {
             stmt = ParseReturnStatement(prs); break;
         case WhileKeyword:
             stmt = ParseWhileStatement(prs); break;
+        case BreakKeyword:
+            stmt = ParseBreakStatement(prs); break;
+        case ContinueKeyword:
+            stmt = ParseContinueStatement(prs); break;
         default:
             stmt = ParseExpressionStatement(prs); break;
             //Die("dude no fucking clue what to do with this %s", TokenTypeNames[CurrentToken(prs).Type]);
@@ -296,6 +304,24 @@ WhileStatementNode *ParseWhileStatement(Parser *prs) {
     me->Condition = condition;
     me->Body = body;
 
+    return me;
+}
+
+BreakStatementNode *ParseBreakStatement(Parser *prs) {
+    Consume(prs, BreakKeyword);
+
+    // allocate some space for this break statement
+    BreakStatementNode *me = GC_MALLOC(sizeof(BreakStatementNode));
+    me->base.Type = BreakStatement;
+    return me;
+}
+
+ContinueStatementNode *ParseContinueStatement(Parser *prs) {
+    Consume(prs, ContinueKeyword);
+
+    // allocate some space for this break statement
+    ContinueStatementNode *me = GC_MALLOC(sizeof(ContinueStatementNode));
+    me->base.Type = ContinueStatement;
     return me;
 }
 
@@ -417,7 +443,7 @@ AssignmentExpressionNode *ParseAssignmentExpression(Parser *prs) {
 
     // allocate some space for this assignment expression
     AssignmentExpressionNode *me = GC_MALLOC(sizeof(AssignmentExpressionNode));
-    me->base.Type = LiteralExpression;
+    me->base.Type = AssignmentExpression;
     me->Identifier = identifier;
     me->Value = value;
 

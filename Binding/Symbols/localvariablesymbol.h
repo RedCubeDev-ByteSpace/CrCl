@@ -7,14 +7,14 @@
 
 #include "symbol.h"
 #include "typesymbol.h"
+#include "variablesymbol.h"
 
 typedef struct LOCAL_VARIABLE_SYMBOL LocalVariableSymbol;
 
 struct LOCAL_VARIABLE_SYMBOL {
-    Symbol base;
+    VariableSymbol base;
 
     int UniqueId;
-    TypeSymbol *Type;
 };
 
 #endif //CRCL_LOCALVARIABLESYMBOL_H
